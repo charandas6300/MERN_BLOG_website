@@ -14,7 +14,7 @@ app.use(cors({credentials:true, origin:'http://localhost:3000'}))
 app.use(express.json())
 
 //mongo connection
-mongoose.connect('mongodb+srv://vankadothcharandas:asdfghjkl@cluster0.uxorr5q.mongodb.net/?retryWrites=true&w=majority')
+mongoose.connect('insert your link')
 
 // app.get('/',(req,res)=>{
 //     res.send("SERVER")
