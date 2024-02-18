@@ -83,6 +83,6 @@ button{
   padding: 7px 0;
 }
 
-form h2{
+form.login h2, form.register h2{
   text-align: center;
 }
