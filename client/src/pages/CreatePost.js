@@ -1,6 +1,7 @@
 import { useState } from "react";
 import ReactQuill from "react-quill";
 import 'react-quill/dist/quill.snow.css'
+import { Navigate } from "react-router-dom";
 
 
 const modules = {
@@ -24,19 +25,25 @@ export default function CreatePost(){
     const [summary,setSummary] = useState('');
     const[content, setContet] = useState('');
     const [files,setFiles] = useState('');
-    function createNewPost(e){
+    const [redirect, setRedirect] = useState('')
+    async function createNewPost(e){
         const data = new FormData;
         data.set('title', title)
         data.set('summary', summary)
         data.set('content', content)
         data.set('file', files[0]);//if many files selected the we grab first file only file[0]
         e.preventDefault();
-        console.log(files)
-        // fetch('http://localhost:/post',{
-        //     method:'POST',
-        //     body:
-        // })
+        const response = await fetch('http://localhost:4000/post',{
+            method:'POST',
+            body:data,
+        });
+        if (response.ok){
+          setRedirect(true);
+        }
+    }
 
+    if(redirect){
+      return <Navigate to={'/'}/>
     }
 
     return(
