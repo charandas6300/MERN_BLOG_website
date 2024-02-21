@@ -6,6 +6,8 @@ const Post = require('./models/Post');
 var bcrypt = require('bcryptjs');
 const app = express();
 const jwt = require('jsonwebtoken');
+//
+// const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const multer = require('multer');
 const uploadMiddleware = multer({dest: './uploads'});
@@ -19,10 +21,11 @@ const secret = 'dqewr273edwgcer6879r23ude9t723';
 app.use(cors({credentials:true, origin:'http://localhost:3000'}))
 app.use(express.json())
 app.use(cookieParser())
+// api.use(bodyParser.urlencoded({ extended: true }));
 
 //mongo connection
 mongoose.connect('mongodb+srv://vankadothcharandas:asdfghjkl@cluster0.uxorr5q.mongodb.net/?retryWrites=true&w=majority')
-// mongoose.connect('insert your link')
+
 
 // app.get('/',(req,res)=>{
 //     res.send("SERVER")
@@ -99,4 +102,8 @@ app.post('/post',uploadMiddleware.single('file'), async(req,res)=>{//in createPo
     res.json(PostDoc);
 });
 
+
+app.get('/post',async(req,res)=>{
+    res.json(await Post.find());
+})
 app.listen(4000)

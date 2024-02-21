@@ -25,7 +25,7 @@ export default function CreatePost(){
     const [summary,setSummary] = useState('');
     const[content, setContet] = useState('');
     const [files,setFiles] = useState('');
-    const [redirect, setRedirect] = useState('')
+    const [redirect, setRedirect] = useState(false)
     async function createNewPost(e){
         const data = new FormData;
         data.set('title', title)
