@@ -21,15 +21,13 @@ const secret = 'dqewr273edwgcer6879r23ude9t723';
 app.use(cors({credentials:true, origin:'http://localhost:3000'}))
 app.use(express.json())
 app.use(cookieParser())
+app.use('/uploads', express.static(__dirname + '/uploads'));
 // api.use(bodyParser.urlencoded({ extended: true }));
 
 //mongo connection
 mongoose.connect('mongodb+srv://vankadothcharandas:asdfghjkl@cluster0.uxorr5q.mongodb.net/?retryWrites=true&w=majority')
 
 
-// app.get('/',(req,res)=>{
-//     res.send("SERVER")
-// })
 
 //registering of the user
 app.post('/register',async(req,res)=>{
@@ -74,7 +72,6 @@ app.get('/profile',(req,res)=>{
         if(err) throw err;
         res.json(info);
     })
-    res.json(req.cookies)
 })
 
 
@@ -90,20 +87,75 @@ app.post('/post',uploadMiddleware.single('file'), async(req,res)=>{//in createPo
     const newPath = path+'.'+ext;
     fs.renameSync(path, newPath);
 
-    const {title, summary, content} = req.body; 
-
-    const PostDoc = await Post.create({
-        title,
-        summary,
-        content,
-        cover:newPath,
+    const {token} = req.cookies;
+    jwt.verify(token,secret,{},async(err,info)=>{
         
+        if(err) throw err;
+        const {title, summary, content} = req.body; 
+
+        const PostDoc = await Post.create({
+            title,
+            summary,
+            content,
+            cover:newPath,
+            author:info.id,       
+        })
+        res.json(PostDoc);
     })
-    res.json(PostDoc);
+  
+});
+
+
+app.put('/post', uploadMiddleware.single('file'), async(req,res)=>{
+    let newPath = null;
+    if(req.file){
+    const {originalname, path} = req.file;
+    const parts = originalname.split('.');
+    const ext = parts[parts.length - 1];
+    newPath = path+'.'+ext;
+    fs.renameSync(path, newPath);
+    }
+
+    const {token} = req.cookies;
+    jwt.verify(token,secret,{},async(err,info)=>{
+        
+        if(err) throw err;
+        const {id, title, summary, content} = req.body; 
+        const postDoc = await Post.findById(id);
+        const isAuthor = JSON.stringify(postDoc.author)=== JSON.stringify(info.id);
+        if(!isAuthor){
+            return res.status(400).json('you are not the author');
+        }
+
+        const updatedPost = await Post.findByIdAndUpdate(id, {
+            title,
+            summary,
+            content,
+            cover: newPath ? newPath : postDoc.cover,
+        }, { new: true });
+        
+        res.json(updatedPost);
+        
+    });
+
 });
 
 
 app.get('/post',async(req,res)=>{
-    res.json(await Post.find());
-})
+    res.json(
+        await Post.find()
+        .populate('author',['username'])
+        .sort({createdAt: -1})
+        .limit(20)
+        );
+});
+
+
+
+app.get('/post/:id', async (req, res) => {
+    const {id} = req.params;
+    const postDoc = await Post.findById(id).populate('author', ['username']);
+    res.json(postDoc);
+  })
+  
 app.listen(4000)
